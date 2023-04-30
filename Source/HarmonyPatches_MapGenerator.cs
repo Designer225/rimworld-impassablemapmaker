@@ -91,7 +91,7 @@ namespace ImpassableMapMaker
         public IntVec3 Center => new IntVec3((int)(this.HighZ - this.LowX * 0.5f) + this.LowX, 0, (int)(this.HighZ - this.LowZ * 0.5f) + this.LowZ);
     }
 
-    [HarmonyPatch(typeof(GenStep_ElevationFertility), "Generate")]
+    [HarmonyPatch(typeof(GenStep_ElevationFertility), nameof(GenStep_ElevationFertility.Generate))]
     static class Patch_GenStep_Terrain
     {
         public static IntVec2? middleAreaCenter = null;
@@ -386,13 +386,13 @@ namespace ImpassableMapMaker
         }
     }
 
-    [HarmonyPatch(typeof(GenStep_ScattererBestFit), "TryFindScatterCell")]
+    [HarmonyPatch(typeof(GenStep_Scatterer), "TryFindScatterCell")]
     static class Patch_GenStep_ScattererBestFit
     {
         [HarmonyPriority(Priority.First)]
-        static bool Prefix(GenStep_ScattererBestFit __instance, ref bool __result, Map map, ref IntVec3 result)
+        static bool Prefix(GenStep_Scatterer __instance, ref bool __result, Map map, ref IntVec3 result)
         {
-            if (__instance.def.defName.Contains("Archonexus"))
+            if (__instance.def.IsQuestArea())
             {
                 ITerrainOverride o = Patch_GenStep_Terrain.QuestArea;
                 result = new IntVec3(o.Center.x, o.Center.y, o.Center.z);
@@ -421,7 +421,7 @@ namespace ImpassableMapMaker
         }
     }
 
-    [HarmonyPatch(typeof(MapGenerator), "GenerateMap")]
+    [HarmonyPatch(typeof(MapGenerator), nameof(MapGenerator.GenerateMap))]
     public class Patch_MapGenerator_Generate
     {
         public static bool IsQuestMap = false;
@@ -449,7 +449,7 @@ namespace ImpassableMapMaker
 
             foreach (var d in mapGenerator.genSteps)
             {
-                if (d.genStep.def.defName.Contains("Archonexus"))
+                if (d.genStep.def.IsQuestArea())
                 {
                     IsQuestMap = true;
                     return;
@@ -460,7 +460,7 @@ namespace ImpassableMapMaker
             {
                 foreach (var d in extraGenStepDefs)
                 {
-                    if (d.def.defName.Contains("Archonexus"))
+                    if (d.def.IsQuestArea())
                     {
                         IsQuestMap = true;
                         return;
@@ -547,10 +547,9 @@ namespace ImpassableMapMaker
         }
     }
 
-    [HarmonyPatch(typeof(GenStep_FindPlayerStartSpot), "Generate")]
+    [HarmonyPatch(typeof(GenStep_FindPlayerStartSpot), nameof(GenStep_FindPlayerStartSpot.Generate))]
     static class Patch_GenStep_FindPlayerStartSpot_Generate
     {
-        public static ITerrainOverride QuestArea = null;
         static void Postfix(Map map)
         {
             if (map.TileInfo.hilliness == Hilliness.Impassable &&
@@ -584,7 +583,7 @@ namespace ImpassableMapMaker
         }
     }
 
-    [HarmonyPatch(typeof(SettleInEmptyTileUtility), "Settle")]
+    [HarmonyPatch(typeof(SettleInEmptyTileUtility), nameof(SettleInEmptyTileUtility.Settle))]
     static class Patch_SettleInEmptyTileUtility_Settle
     {
         public static ImpassableShape OutterShape = ImpassableShape.NotSet;
@@ -605,7 +604,7 @@ namespace ImpassableMapMaker
         }
     }
 
-    [HarmonyPatch(typeof(CaravanEnterMapUtility), "Enter")]
+    [HarmonyPatch(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter))]
     [HarmonyPatch(new Type[] { typeof(Caravan), typeof(Map), typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>)  })]
     static class Patch_CaravanEnterMapUtility_Enter
     {

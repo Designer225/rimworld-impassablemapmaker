@@ -20,7 +20,7 @@ namespace ImpassableMapMaker
             }
         }
 
-        [HarmonyPatch(typeof(WorldPathGrid), "CalculatedMovementDifficultyAt")]
+        [HarmonyPatch(typeof(WorldPathGrid), nameof(WorldPathGrid.CalculatedMovementDifficultyAt))]
         static class Patch_WorldPathGrid_CalculatedMovementDifficultyAt
         {
             static bool Prefix(ref float __result, int tile, bool perceivedStatic, int? ticksAbs = null, StringBuilder explanation = null)
@@ -53,7 +53,7 @@ namespace ImpassableMapMaker
             }
         }
 
-        [HarmonyPatch(typeof(TileFinder), "IsValidTileForNewSettlement")]
+        [HarmonyPatch(typeof(TileFinder), nameof(TileFinder.IsValidTileForNewSettlement))]
         static class Patch_TileFinder_IsValidTileForNewSettlement
         {
             [HarmonyPriority(Priority.First)]
